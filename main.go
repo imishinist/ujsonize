@@ -56,14 +56,6 @@ func decode(in []byte, out io.Writer) error {
 	return nil
 }
 
-func read(in io.Reader) ([]byte, error) {
-	parsed, err := ioutil.ReadAll(in)
-	if err != nil {
-		return nil, fmt.Errorf("faield to read: %w", err)
-	}
-	return parsed, nil
-}
-
 func main() {
 	flag.Usage = flagUsage
 	encodeCmd := flag.NewFlagSet("encode", flag.ExitOnError)
@@ -104,7 +96,7 @@ func main() {
 			}
 		}
 	} else {
-		in, err := read(os.Stdin)
+		in, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			log.Fatalf("failed to %s: %w", action, err)
 		}
