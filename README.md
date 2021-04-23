@@ -18,6 +18,10 @@ foo=bar
 $ go get github.com/imishinist/ujsonize
 ```
 
+# License
+
+MIT
+
 # Author
 
 Taisuke Miyazaki (a.k.a imishinist)
