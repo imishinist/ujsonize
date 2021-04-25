@@ -56,6 +56,16 @@ func decode(in []byte, out io.Writer) error {
 	return nil
 }
 
+type Config struct {
+	ByLine bool
+	NoTrim bool
+}
+
+func bindFlag(set *flag.FlagSet, config *Config) {
+	set.BoolVar(&config.NoTrim, "no-trim", false, "don't trim whitespace")
+	set.BoolVar(&config.ByLine, "by-line", false, "process by line")
+}
+
 func main() {
 	flag.Usage = flagUsage
 	encodeCmd := flag.NewFlagSet("encode", flag.ExitOnError)
@@ -63,19 +73,17 @@ func main() {
 	flag.Parse()
 
 	var (
-		notrim, byline bool
-		fp             func([]byte, io.Writer) error
+		config Config
+		fp     func([]byte, io.Writer) error
 	)
 	action := flag.Arg(0)
 	switch action {
 	case "encode":
-		encodeCmd.BoolVar(&notrim, "no-trim", false, "don't trim whitespace")
-		encodeCmd.BoolVar(&byline, "byline", false, "process by line")
+		bindFlag(encodeCmd, &config)
 		encodeCmd.Parse(flag.Args()[1:])
 		fp = encode
 	case "decode":
-		decodeCmd.BoolVar(&notrim, "no-trim", false, "don't trim whitespace")
-		decodeCmd.BoolVar(&byline, "byline", false, "process by line")
+		bindFlag(decodeCmd, &config)
 		decodeCmd.Parse(flag.Args()[1:])
 		fp = decode
 	default:
@@ -83,11 +91,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if byline {
+	if config.ByLine {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			in := scanner.Bytes()
-			if !notrim {
+			if !config.NoTrim {
 				in = bytes.TrimSpace(in)
 			}
 			if err := fp(in, os.Stdout); err != nil {
@@ -100,7 +108,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to %s: %w", action, err)
 		}
-		if !notrim {
+		if !config.NoTrim {
 			in = bytes.TrimSpace(in)
 		}
 		if err := fp(in, os.Stdout); err != nil {
