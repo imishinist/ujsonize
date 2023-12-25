@@ -15,7 +15,7 @@ foo=bar
 # Installation
 
 ```
-$ go get github.com/imishinist/ujsonize
+$ go install github.com/imishinist/ujsonize@latest
 ```
 
 # License
