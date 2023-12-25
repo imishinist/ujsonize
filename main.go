@@ -13,6 +13,10 @@ import (
 	"strings"
 )
 
+func init() {
+	log.SetFlags(log.Llongfile)
+}
+
 func flagUsage() {
 	usageText := `Encode and Decode url.Values to json.
 
@@ -98,20 +102,20 @@ func main() {
 				in = bytes.TrimSpace(in)
 			}
 			if err := fp(in, os.Stdout); err != nil {
-				log.Printf("failed to %s: %w", action, err)
+				log.Printf("%s", err)
 				continue
 			}
 		}
 	} else {
 		in, err := io.ReadAll(os.Stdin)
 		if err != nil {
-			log.Fatalf("failed to %s: %w", action, err)
+			log.Fatal(err)
 		}
 		if !config.NoTrim {
 			in = bytes.TrimSpace(in)
 		}
 		if err := fp(in, os.Stdout); err != nil {
-			log.Fatalf("failed to %s: %w", action, err)
+			log.Fatal(err)
 		}
 	}
 }
