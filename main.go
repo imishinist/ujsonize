@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -104,7 +103,7 @@ func main() {
 			}
 		}
 	} else {
-		in, err := ioutil.ReadAll(os.Stdin)
+		in, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			log.Fatalf("failed to %s: %w", action, err)
 		}
