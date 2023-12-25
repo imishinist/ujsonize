@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -44,13 +45,36 @@ func encode(in []byte, out io.Writer) error {
 }
 
 func decode(in []byte, out io.Writer) error {
-	uv := make(map[string][]string)
-	if err := json.Unmarshal(in, &uv); err != nil {
+	tmp_uv := make(map[string]interface{})
+	if err := json.Unmarshal(in, &tmp_uv); err != nil {
 		return fmt.Errorf("failed to decode json: %w", err)
 	}
 
+	keys := make([]string, 0)
+	uv := make(map[string][]string)
+	for k, v := range tmp_uv {
+		keys = append(keys, k)
+		switch v.(type) {
+		case []interface{}:
+			uv[k] = make([]string, 0, len(v.([]interface{})))
+			for _, vv := range v.([]interface{}) {
+				uv[k] = append(uv[k], fmt.Sprintf("%v", vv))
+			}
+		case string:
+			uv[k] = []string{v.(string)}
+		default:
+			tmp, err := json.Marshal(v)
+			if err != nil {
+				return fmt.Errorf("failed to encode json: %w", err)
+			}
+			uv[k] = []string{string(tmp)}
+		}
+	}
+	sort.Strings(keys)
+
 	ret := make([]string, 0, len(uv))
-	for k, params := range uv {
+	for _, k := range keys {
+		params := uv[k]
 		for _, param := range params {
 			ret = append(ret, fmt.Sprintf("%s=%s", k, param))
 		}
